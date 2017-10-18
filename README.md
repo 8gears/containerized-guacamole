@@ -1,6 +1,6 @@
-# Guacamole in a Container Secured with TLS
+# Apache Guacamole in a Container Secured with TLS
 
-This Docker Compose setup makes it very easy run Apache Guacamole behind a NGINX reverse proxy with TLS secured.
+This Docker Compose setup makes it very easy run [Apache Guacamole](https://guacamole.incubator.apache.org/) behind a NGINX reverse proxy with TLS secured.
 
 ## Unique Features
 
@@ -10,25 +10,26 @@ This Docker Compose setup makes it very easy run Apache Guacamole behind a NGINX
 * TLS encrypted traffic with Let's Encrypt Support
 
 ## Run
-Before you start teh service some minimal configuration is needed.
-The easiest way is to create a `.env` file in your workdir with the following four required entires:
+
+Before you start the service configuration three mandatory parameters.
+The easiest way is to create a `.env` file in your workdir like this:
 
 ```ini
 cut > .env <<EOF
-POSTGRES_USER=guacadb
 POSTGRES_PASSWORD=*****
 VIRTUAL_HOST=workshop.8gears.com
 LETSENCRYPT_EMAIL=example@8gears.com
 EOF
 ```
 
-It is advised to run db `init-guac-db` once at the beginning to export the database schema so Postgres can pick it up and init the database. Otherwise it is not guaranteed that the file `initdb.sql` is created before postgres starts.
+It is advised to run the service `init-guac-db` once before starting all other services. This one off job will export the application database schema so Postgres can pick it up later and init the database with those values.
 
 ```sh
 docker-compose -f https://raw.githubusercontent.com/8gears/containerized-guacamole/master/docker-compose.yml up init-guac-db
 ```
 
 Finally start Guacamole Services:
+
 ```sh
 docker-compose -f https://raw.githubusercontent.com/8gears/containerized-guacamole/master/docker-compose.yml up -d
 ```

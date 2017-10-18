@@ -1,6 +1,6 @@
 #
 # Apache Guacamole with NGIXN reverse proxy and Let's Encrypt.
-# For more details see:
+# For more details see: https://github.com/8gears/containerized-guacamole
 # 
 version: '3'
 
@@ -47,7 +47,7 @@ services:
       - dbinit:/docker-entrypoint-initdb.d        
       - dbdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: 
+      POSTGRES_USER: ${POSTGRES_USER:-guacadb} 
       POSTGRES_PASSWORD: 
     depends_on:
       - init-guac-db
@@ -62,8 +62,8 @@ services:
     environment:
       GUACD_HOSTNAME: guacd
       POSTGRES_HOSTNAME: postgres
-      POSTGRES_DATABASE: ${POSTGRES_USER}
-      POSTGRES_USER:
+      POSTGRES_DATABASE: ${POSTGRES_USER:-guacadb} 
+      POSTGRES_USER: ${POSTGRES_USER:-guacadb} 
       POSTGRES_PASSWORD:
       LETSENCRYPT_TEST: ${LETSENCRYPT_TEST:-false}
       VIRTUAL_HOST: 
