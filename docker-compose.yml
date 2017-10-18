@@ -1,0 +1,83 @@
+#
+# Apache Guacamole with NGIXN reverse proxy and Let's Encrypt.
+# For more details see:
+# 
+version: '3'
+
+services:
+  nginx:
+    image: jwilder/nginx-proxy:alpine
+    labels:
+        com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  nginx-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-letsencrypt
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  init-guac-db:
+    image: guacamole/guacamole:latest
+    command: ["/bin/sh", "-c", "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgres > /init/initdb.sql" ]
+    volumes:
+      - dbinit:/init    
+
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - dbinit:/docker-entrypoint-initdb.d        
+      - dbdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
+    depends_on:
+      - init-guac-db
+
+  guacd:
+    image: guacamole/guacd:latest
+    restart: unless-stopped
+
+  guac:
+    image: guacamole/guacamole:latest
+    restart: unless-stopped
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_DATABASE: ${POSTGRES_USER}
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST:-false}
+      VIRTUAL_HOST: 
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: 
+    depends_on:
+      - postgres
+      - guacd
+
+volumes:
+  dbinit:
+  dbdata:
+  conf:
+  vhost:
+  html:
+  certs:
+
