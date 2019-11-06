@@ -4,7 +4,7 @@ This Docker Compose setup makes it very easy run [Apache Guacamole](https://guac
 
 ## Unique Features
 
-* Unlike other examples with compose this setup is much simpler to setup and furthermore complies with common docker practice.
+* Unlike other examples with compose this setup is much simpler to setup and is inline with common docker practice.
 * This composition is using official Apache Guacamole Docker Images [guacamole/guacamole:latest](https://hub.docker.com/r/guacamole/).
 * Automatically created and configured Nginx Reverse Proxy in front of the Guacamole Service.
 * TLS encrypted traffic with Let's Encrypt for your public custom domain.
