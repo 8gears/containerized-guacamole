@@ -21,20 +21,24 @@ The easiest way is to create a `.env` file in your working directory eg.:
 cut > .env <<EOF
 POSTGRES_PASSWORD=*****
 VIRTUAL_HOST=workshop.8gears.com
+LETSENCRYPT_EMAIL=user@domain.com
 EOF
 ```
 
 It is advised to run the service `init-guac-db` once before starting all other services. This one off job will export the application database schema so Postgres can pick it up when it starts and init the database with those values accordingly.
 
 *Step 2*
+
+Copy this `docker-compose.yml` to your computer and do:
+
 ```sh
-docker-compose -f https://raw.githubusercontent.com/8gears/containerized-guacamole/master/docker-compose.yml up init-guac-db
+docker-compose up init-guac-db
 ```
 
 *Step 3* Start Guacamole Services:
 
 ```sh
-docker-compose -f https://raw.githubusercontent.com/8gears/containerized-guacamole/master/docker-compose.yml up -d
+docker-compose up -d
 ```
 
 Now go to your application https://workshop.domain.org/guacamole and login as guacadmin/guacadmin. 
