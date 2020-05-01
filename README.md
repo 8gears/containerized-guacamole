@@ -1,18 +1,18 @@
 # Apache Guacamole in a Container Secured with TLS
 
-This Docker Compose setup makes it very easy run [Apache Guacamole](https://guacamole.incubator.apache.org/) behind a NGINX reverse proxy TLS secured with Let's Encrypt.
+This Docker Compose setup makes it very easy (only 3 cli commands) to run [Apache Guacamole](https://guacamole.incubator.apache.org/) behind a NGINX reverse proxy and everything TLS secured with Let's Encrypt.
 
 ## Unique Features
 
-* Unlike other examples with compose this setup is much simpler to setup and is inline with common docker practice.
-* This composition is using official Apache Guacamole Docker Images [guacamole/guacamole:latest](https://hub.docker.com/r/guacamole/).
+* Unlike other solutions this setup is much simpler to setup and is inline with docker/docker-compse best practice.
+* Here we use official Apache Guacamole Docker Images [guacamole/guacamole:latest](https://hub.docker.com/r/guacamole/) always up to date.
 * Automatically created and configured Nginx Reverse Proxy in front of the Guacamole Service.
-* TLS encrypted traffic with Let's Encrypt for your public custom domain.
+* TLS encrypted traffic with Let's Encrypt for your public domain.
 * Minimal configuration of only *two* mandatory environment variables.
 
 ## Run
 
-Before you start the service configure two mandatory parameters.
+Before you start the service, define three mandatory variables.
 The easiest way is to create a `.env` file in your working directory eg.:
 
 *Step 1*
@@ -25,17 +25,19 @@ LETSENCRYPT_EMAIL=user@domain.com
 EOF
 ```
 
-It is advised to run the service `init-guac-db` once before starting all other services. This one off job will export the application database schema so Postgres can pick it up when it starts and init the database with those values accordingly.
+Run the service `init-guac-db` once before starting all other services. This one off job will export the application database schema so Postgres can pick it up when it starts and initialize the database with values and schema for Guacamole.
 
 *Step 2*
 
-Copy this `docker-compose.yml` to your computer and do:
+Copy the `docker-compose.yml` from this repository to your computer and do:
 
 ```sh
 docker-compose up init-guac-db
 ```
+The job should start and terminate after the schema is created:
 
-*Step 3* Start Guacamole Services:
+
+*Step 3* Start Guacamole and all other Services:
 
 ```sh
 docker-compose up -d
