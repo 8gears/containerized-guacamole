@@ -15,7 +15,7 @@ This Docker Compose setup makes it very easy (only 3 cli commands) to run [Apach
 Before you start the service, define three mandatory variables.
 The easiest way is to create a `.env` file in your working directory eg.:
 
-*Step 1*
+### Step 1 - Define your Domain and DB Password
 
 ```ini
 cut > .env <<EOF
@@ -27,7 +27,7 @@ EOF
 
 Run the service `init-guac-db` once before starting all other services. This one off job will export the application database schema so Postgres can pick it up when it starts and initialize the database with values and schema for Guacamole.
 
-*Step 2*
+### Step 2 - Populate DB
 
 Copy the `docker-compose.yml` from this repository to your computer and do:
 
@@ -37,7 +37,7 @@ docker-compose up init-guac-db
 The job should start and terminate after the schema is created:
 
 
-*Step 3* Start Guacamole and all other Services:
+### Step 3 - Start Guacamole and other Services:
 
 ```sh
 docker-compose up -d
