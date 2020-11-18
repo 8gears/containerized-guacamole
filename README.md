@@ -1,6 +1,6 @@
 # Apache Guacamole in a Container with TLS
 
-This Docker Compose setup makes it very easy (only 3 cli commands) to run [Apache Guacamole](https://guacamole.incubator.apache.org/) behind a NGINX reverse proxy and everything TLS secured with Let's Encrypt.
+This Docker Compose setup makes it very easy (only 3 cli commands) to run [Apache Guacamole](https://guacamole.incubator.apache.org/) behind a NGINX reverse proxy TLS secured with Let's Encrypt.
 
 *Although this repo is 3 years old it is still up to date and uses the latest images.*
 
