@@ -48,3 +48,11 @@ docker-compose up -d
 
 Now go to your application https://workshop.domain.org/guacamole and login as guacadmin/guacadmin. 
 Don't forget to change the password in the next step.
+
+
+## Advanced Topics
+
+### Extension
+
+It is possible to add extensions (.jar) to this compose project. 
+See a [working example](https://github.com/8gears/containerized-guacamole/issues/3#issuecomment-932015027) from contributor @marekschneider.   
