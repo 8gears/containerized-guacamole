@@ -49,6 +49,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-guacadb} 
       POSTGRES_PASSWORD: 
+      POSTGRES_INITDB_ARGS: --auth-host=md5
     depends_on:
       - init-guac-db
 
