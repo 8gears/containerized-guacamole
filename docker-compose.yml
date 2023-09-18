@@ -36,7 +36,7 @@ services:
 
   init-guac-db:
     image: guacamole/guacamole:latest
-    command: ["/bin/sh", "-c", "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgres > /init/initdb.sql" ]
+    command: ["/bin/sh", "-c", "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgresql > /init/initdb.sql" ]
     volumes:
       - dbinit:/init    
 
