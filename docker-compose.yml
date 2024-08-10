@@ -68,7 +68,7 @@ services:
       POSTGRES_PASSWORD:
       LETSENCRYPT_TEST: ${LETSENCRYPT_TEST:-false}
       VIRTUAL_HOST: 
-      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
       LETSENCRYPT_EMAIL: 
     depends_on:
       - postgres
