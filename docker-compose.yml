@@ -1,14 +1,15 @@
 #
-# Apache Guacamole with NGIXN reverse proxy and Let's Encrypt.
+# Apache Guacamole with NGINX reverse proxy and Let's Encrypt.
 # For more details see: https://github.com/8gears/containerized-guacamole
-# 
-version: '3'
+#
 
 services:
   nginx:
-    image: jwilder/nginx-proxy:alpine
+    # https://github.com/nginx-proxy/nginx-proxy
+    # Pinned to the release line: the bare :alpine tag tracks untagged commits.
+    image: nginxproxy/nginx-proxy:1.11-alpine
     labels:
-        com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+      com.github.nginx-proxy.nginx: "true"
     container_name: nginx
     restart: unless-stopped
     ports:
@@ -22,36 +23,51 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   nginx-letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    # https://github.com/nginx-proxy/acme-companion
+    image: nginxproxy/acme-companion:2.8
     container_name: nginx-letsencrypt
     restart: unless-stopped
     depends_on:
       - nginx
+    environment:
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
     volumes:
       - conf:/etc/nginx/conf.d
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   init-guac-db:
     image: guacamole/guacamole:latest
-    command: ["/bin/sh", "-c", "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgresql > /init/initdb.sql" ]
+    # The image runs as uid 1001, but Docker creates named volumes owned by
+    # root, so the schema dump can only be written as root.
+    user: root
+    command: ["/bin/sh", "-c", "test -e /init/initdb.sql && echo 'init file already exists' || /opt/guacamole/bin/initdb.sh --postgresql > /init/initdb.sql" ]
     volumes:
-      - dbinit:/init    
+      - dbinit:/init
 
   postgres:
-    image: postgres:latest
+    # Pinned on purpose: postgres:18 moved PGDATA out of /var/lib/postgresql/data
+    # and refuses to start against the layout this volume mapping uses.
+    image: postgres:17-alpine
     restart: unless-stopped
     volumes:
-      - dbinit:/docker-entrypoint-initdb.d        
+      - dbinit:/docker-entrypoint-initdb.d:ro
       - dbdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-guacadb} 
-      POSTGRES_PASSWORD: 
-      POSTGRES_INITDB_ARGS: --auth-host=md5
+      POSTGRES_USER: ${POSTGRES_USER:-guacadb}
+      POSTGRES_PASSWORD:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guacadb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     depends_on:
-      - init-guac-db
+      init-guac-db:
+        # Without this the schema dump races the database first start.
+        condition: service_completed_successfully
 
   guacd:
     image: guacamole/guacd:latest
@@ -62,17 +78,25 @@ services:
     restart: unless-stopped
     environment:
       GUACD_HOSTNAME: guacd
-      POSTGRES_HOSTNAME: postgres
-      POSTGRES_DATABASE: ${POSTGRES_USER:-guacadb} 
-      POSTGRES_USER: ${POSTGRES_USER:-guacadb} 
-      POSTGRES_PASSWORD:
+      POSTGRESQL_HOSTNAME: postgres
+      POSTGRESQL_DATABASE: ${POSTGRES_USER:-guacadb}
+      POSTGRESQL_USERNAME: ${POSTGRES_USER:-guacadb}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
       LETSENCRYPT_TEST: ${LETSENCRYPT_TEST:-false}
-      VIRTUAL_HOST: 
+      VIRTUAL_HOST:
       LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
-      LETSENCRYPT_EMAIL: 
+      LETSENCRYPT_EMAIL:
+    # To add extensions (.jar), uncomment both lines below and drop the jars
+    # into ./extensions. GUACAMOLE_HOME is a template the entrypoint links
+    # from; mounting into /opt/guacamole/extensions does not survive a restart.
+    #  GUACAMOLE_HOME: /etc/guacamole
+    #volumes:
+    #  - ./extensions:/etc/guacamole/extensions:ro
     depends_on:
-      - postgres
-      - guacd
+      postgres:
+        condition: service_healthy
+      guacd:
+        condition: service_started
 
 volumes:
   dbinit:
@@ -81,4 +105,4 @@ volumes:
   vhost:
   html:
   certs:
-
+  acme:
